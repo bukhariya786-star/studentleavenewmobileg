@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bukhariya Fest - Total Scoreboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --bg-dark: #020617;
+            --gold: #fbbf24;
+            --silver: #e2e8f0;
+            --maroon: #991b1b;
+            --team1-color: #9d50bb; /* തമാമിയ - Purple */
+            --team2-color: #00d2ff; /* ബാത്തിമിയ - Blue */
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-dark);
+            background-image: radial-gradient(circle at top right, #1e1b4b, transparent), radial-gradient(circle at bottom left, #1e1b4b, transparent);
+            color: white;
+            min-height: 100vh;
+        }
+
+        /* --- Header & Summary Section --- */
+        .header {
+            text-align: center;
+            padding: 30px 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+        }
+
+        .summary-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            max-width: 950px;
+            margin: -30px auto 30px;
+            padding: 0 15px;
+        }
+
+        .team-total-card {
+            padding: 20px;
+            border-radius: 25px;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            border: 2px solid rgba(255,255,255,0.1);
+            position: relative;
+            overflow: hidden;
+            animation: bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes bounceIn {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .team-1-bg { background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); }
+        .team-2-bg { background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%); }
+
+        .team-icon { font-size: 2.5rem; margin-bottom: 5px; display: block; }
+        .total-label { font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+        .total-points { font-size: 3rem; font-weight: 800; line-height: 1; margin: 10px 0; }
+        .team-name-title { font-size: 1.2rem; font-weight: 700; opacity: 0.9; }
+
+        /* --- Detailed Result Cards --- */
+        .container { max-width: 950px; margin: 0 auto; padding: 0 15px 100px; }
+        
+        .score-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            border-radius: 15px;
+            margin-bottom: 15px;
+            padding: 15px;
+            border-left: 5px solid #fff;
+            animation: slideIn 0.5s ease forwards;
+        }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card-top { display: flex; align-items: center; justify-content: space-between; }
+        .rank-badge { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; }
+        
+        .rank-1 { background: var(--gold); color: #000; box-shadow: 0 0 15px var(--gold); }
+        .rank-2 { background: var(--silver); color: #000; }
+        .rank-3 { background: var(--maroon); color: #fff; }
+
+        .info { flex: 1; padding: 0 15px; }
+        .info .p-name { font-size: 1.1rem; font-weight: 700; }
+        .info .e-name { font-size: 0.8rem; color: #38bdf8; text-transform: uppercase; }
+        
+        .team-tag { font-size: 0.8rem; padding: 4px 12px; border-radius: 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); }
+        .point-val { font-size: 1.5rem; font-weight: 800; color: #fbbf24; width: 50px; text-align: right; }
+
+        .details-row {
+            margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.05);
+            display: flex; justify-content: space-between; font-size: 0.85rem; color: #94a3b8;
+        }
+
+        @media (max-width: 600px) {
+            .total-points { font-size: 2rem; }
+            .team-name-title { font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1 style="margin:0; letter-spacing: 2px;">BUKHARIYA ARTS FEST</h1>
+    <p style="opacity:0.6;">Live Grand Finale Scoreboard</p>
+</div>
+
+<div class="summary-container">
+    <div class="team-total-card team-1-bg">
+        <span class="team-icon">🏆</span>
+        <span class="total-label">Total Points</span>
+        <div class="total-points" id="team1-score">00</div>
+        <div class="team-name-title">തമാമിയ</div>
+    </div>
+    <div class="team-total-card team-2-bg">
+        <span class="team-icon">🔥</span>
+        <span class="total-label">Total Points</span>
+        <div class="total-points" id="team2-score">00</div>
+        <div class="team-name-title">ബാത്തിമിയ</div>
+    </div>
+</div>
+
+<div class="container" id="leaderboard">
+    <div style="text-align:center; padding: 50px;">ഫലങ്ങൾ തയ്യാറാവുന്നു...</div>
+</div>
+
+<script>
+    const tsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ56O5aSnw7A1i-9sD2blisxpJI3OHDoZjBhDNUehlwQMHmISN9gH5e4eBNBgnIm5FU4JvHEjgZUUb8/pub?gid=0&single=true&output=tsv';
+
+    async function updateScores() {
+        try {
+            const response = await fetch(tsvUrl);
+            const data = await response.text();
+            const rows = data.split('\n').slice(1);
+            
+            let team1Total = 0;
+            let team2Total = 0;
+            const container = document.getElementById('leaderboard');
+            container.innerHTML = '';
+
+            rows.forEach((row, index) => {
+                const col = row.split('\t');
+                if (col.length < 5) return;
+
+                const teamName = col[2] ? col[2].trim() : '';
+                const score = parseInt(col[4]) || 0;
+                const rank = col[5] ? col[5].trim() : '';
+
+                // ടീം തിരിച്ചുള്ള പോയിന്റ് കണക്കുകൂട്ടൽ
+                if (teamName.includes("തമാമിയ")) team1Total += score;
+                if (teamName.includes("ബാത്തിമിയ")) team2Total += score;
+
+                // ലിസ്റ്റ് നിർമ്മാണം
+                let rClass = rank === '1' ? 'rank-1' : (rank === '2' ? 'rank-2' : (rank === '3' ? 'rank-3' : ''));
+                const card = document.createElement('div');
+                card.className = 'score-card';
+                card.style.borderColor = teamName.includes("തമാമിയ") ? "var(--team1-color)" : "var(--team2-color)";
+                card.style.animationDelay = (index * 0.1) + 's';
+
+                card.innerHTML = `
+                    <div class="card-top">
+                        <div class="rank-badge ${rClass}">${rank}</div>
+                        <div class="info">
+                            <div class="e-name">${col[0]} | ${col[3]}</div>
+                            <div class="p-name">${col[1]}</div>
+                            <span class="team-tag">${teamName}</span>
+                        </div>
+                        <div class="point-val">${score}</div>
+                    </div>
+                    <div class="details-row">
+                        <span>Status: <b style="color:#fff">${col[6] || '-'}</b></span>
+                        <span>Points: +${score}</span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+            // ടോട്ടൽ സ്കോർ അപ്‌ഡേറ്റ് ചെയ്യുക
+            document.getElementById('team1-score').innerText = team1Total;
+            document.getElementById('team2-score').innerText = team2Total;
+
+            // ഒന്നാം റാങ്ക് ഉണ്ടെങ്കിൽ കോൺഫെറ്റി
+            if (rows.some(r => r.split('\t')[5]?.trim() === '1')) {
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+            }
+
+        } catch (e) { console.error(e); }
+    }
+
+    updateScores();
+    setInterval(updateScores, 30000);
+</script>
+
+</body>
+</html>
